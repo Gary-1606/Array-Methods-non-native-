@@ -1,0 +1,73 @@
+<script src="../tinytest.js"></script>
+<script>
+/* Example 1:
+forEach([1,2,3], function(){
+  console.log('hi');
+});
+
+Example 2: Printing the elements
+forEach([1,2,3], function(item){
+  console.log(item);
+})
+
+Example 3: Printing the index
+forEach([1,2,3], function(item, i){
+  console.log(i);
+})
+
+Example 4: Printing the array
+forEach([1,2,3], function(item, i, array){
+  console.log(array);
+})
+
+Example 5: passing the configurable this function
+forEach([1,2,3], function(item, i, array){
+  console.log(this);
+},this)
+*/
+
+var forEach = function(array, callback, optionalThisObject){
+  var forEachCallBack = callback;
+  
+  if (optionalThisObject) {
+    forEachCallBack = callback.bind(optionalThisObject);
+  }
+  for(var i=0; i<array.length; i++) {
+    forEachCallBack(array[i], i, array);
+  }
+}
+
+tests({
+
+  'It should run the callback function array.length times': function() {
+    var numberOfTimesCallBackHasRun = 0;
+    forEach([1,2,3], function(){
+      numberOfTimesCallBackHasRun++
+    });
+    eq(numberOfTimesCallBackHasRun, 3)
+  },
+  'It should pass the all the ith element to the callback as first arguement': function() {
+    forEach([1], function(item){
+      eq(item, 1);
+    })
+  },
+  'It should pass the i value as second arguement to the callback function': function() {
+    forEach([1], function(item, i) {
+      eq(i, 0);
+    })
+  },
+  'It should pass the array as the third arguement to the callback function': function() {
+    var testArray = [1, 2, 3];
+    forEach(testArray, function(item, i, originalArray) {
+      eq(testArray, originalArray);
+    })
+  },
+  'It should accept an optional this object': function() {
+    var configurableObject = {description: 'I should be accessible in the callback'}
+    forEach([1], function(){
+      eq(this.description, 'I should be accessible in the callback');
+    }, configurableObject);
+  }
+
+});
+</script>

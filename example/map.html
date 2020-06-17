@@ -1,0 +1,129 @@
+<script src="../tinytest.js"></script>
+<script>
+
+    /* Example 1:
+    map([1,2,3], function(){
+      console.log('hi');
+    });
+    
+    Example 2: Printing the elements
+    map([1,2,3], function(item){
+      console.log(item);
+    })
+    
+    Example 3: Printing the index
+    map([1,2,3], function(item, i){
+      console.log(i);
+    })
+    
+    Example 4: Printing the array
+    map([1,2,3], function(item, i, array){
+      console.log(array);
+    })
+    
+    Example 5: passing the configurable this function
+    map([1,2,3], function(item, i, array){
+      console.log(this);
+    },this)
+    
+    Example 6: return the test array
+    var testArray = [1,2,3];
+    var mappedArray = map(testArray, function(){})
+    Expected:
+    testArray !== mappedArray
+    
+    Example 7: 
+    var testArray = [1,2,3];
+    var mappedArray = map(testArray, function(element) {
+        return element * 10;
+    })
+    Expected Result: mappedArray.length === testArray.length;
+    */
+
+    /*  var filter = function (array, callback, optionalThisObject) {
+         var filterCallBack = callback;
+         if (optionalThisObject) {
+             filterCallBack = callback.bind(optionalThisObject);
+         }
+         var filteredArray = [];
+         for (var i = 0; i < array.length; i++) {
+             if(filterCallBack(array[i], i, array)){ // If callback function returns true only then it will have item, so at that time we will put it into an array
+                 filteredArray.push(array[i]);
+             }
+         }
+         return filteredArray;   //If callback returns false, then there is no element in the filteredArray
+     } */
+
+
+    var map = function (array, callback, optionalThisObject) {
+
+        var mappedCallback = callback;
+        if (optionalThisObject) {
+            mappedCallback = callback.bind(optionalThisObject); //object is bound to the callback function. However, bind function returns a function and so we are assigning the returned value to a new variable
+        }
+
+        var mappedArray = [];
+        for (i = 0; i < array.length; i++) {
+            if(i in array){
+                // instead of this, use next line mappedArray.push(mappedCallback(array[i], i, array)); //push the value. 
+                mappedArray[i] = mappedCallback(array[i], i, array);
+            }
+        }
+        return mappedArray;
+
+    }
+    tests({
+        'It should run the callback function array.length times': function () {
+            var numberOfTimesCallBackHasRun = 0;
+            map([1, 2, 3], function () {
+                numberOfTimesCallBackHasRun++
+            });
+            eq(numberOfTimesCallBackHasRun, 3)
+        },
+        'It should pass the all the ith element to the callback as first arguement': function () {
+            map([2], function (item) {
+                eq(item, 2);
+            })
+        },
+        'It should pass the i value as second arguement to the callback function': function () {
+            map([1], function (item, index) {
+                eq(index, 0);
+            })
+        },
+        'It should pass the array as the third arguement to the callback function': function () {
+            var testArray = [1, 2, 3];
+            map(testArray, function (item, index, originalArray) {
+                eq(testArray, originalArray);
+            })
+        },
+        'It should accept an optional this object': function () {
+            var configurableObject = { description: 'I should be accessible in the callback' }
+            map([1], function () {
+                eq(this.description, 'I should be accessible in the callback');
+            }, configurableObject);
+        },
+        'It should return a new mappedArray that is not the same as the originalArray': function () {
+            var originalArray = [];
+            var mappedArray = map(originalArray, function(){});
+            //mappedArray (returned value) is an array
+            eq(Array.isArray(mappedArray), true);
+            //mappedArray is not the same originalArray
+            eq(originalArray !== mappedArray, true);
+        },
+        'It should return a new mappedArray containing elements that has been transformed by callback': function () {
+            var testArray = [1, 2, 3];
+            var mappedArray = map(testArray, function (item) {
+                return item * 20;
+            })
+            eq(mappedArray[0], 20);
+        },
+        'It should skip unassigned indexes': function() {
+            var weirdArray = [,1];
+            var mappedArray = map(weirdArray, function(item){
+                return item * 2;
+            })
+            eq(mappedArray[1], 2);
+            eq((0 in mappedArray === false), true)
+        }
+    });
+</script>
